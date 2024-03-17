@@ -6,17 +6,25 @@ import (
 	"net/http"
 )
 
-func SendJson(w http.ResponseWriter, i interface{}) {
-	err := json.NewEncoder(w).Encode(i)
+func ToJson(w http.ResponseWriter, T any) error {
+	return json.NewEncoder(w).Encode(T)
+}
+
+func FromJSON(r io.Reader, T any) error {
+	return json.NewDecoder(r).Decode(T)
+}
+
+func ReciveJsonWithHandleHttpError(w http.ResponseWriter, r io.Reader, T any) {
+	err := FromJSON(r, T)
 	if err != nil {
-		http.Error(w, "Unable to Encode json", http.StatusInternalServerError)
+		http.Error(w, "Unable to Decode json", http.StatusBadRequest)
 	}
 }
 
-func RecieveJson(w http.ResponseWriter, r io.Reader, i interface{}) {
-	e := json.NewDecoder(r)
-	err := e.Decode(i)
+func SendJsonWithHandleHttpError(w http.ResponseWriter, T any) {
+	err := ToJson(w, T)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Unable to Encode json", http.StatusInternalServerError)
+		return
 	}
 }

@@ -1,9 +1,6 @@
 package data
 
 import (
-	"encoding/json"
-	"io"
-	"net/http"
 	"time"
 )
 
@@ -13,23 +10,21 @@ type Product struct {
 	Price       float32 `json:"price"`
 	Description string  `json:"description"`
 	SKU         string  `json:"sku"`
-	CreatedAt   string  `json:"-"`
-	UpdatedAt   string  `json:"-"`
+	CreatedAt   string  `json:"createdAt"`
+	UpdatedAt   string  `json:"updatedAt"`
 	DeletedAt   string  `json:"-"`
 }
 
 type Products []*Product
 
-func (p *Products) ToJSON(w http.ResponseWriter) error {
-	return json.NewEncoder(w).Encode(p)
-}
-
-func (p *Product) FromJSON(r io.Reader) error {
-	return json.NewDecoder(r).Decode(p)
-}
-
 func GetProducts() Products {
-	return productList
+	filteredProductList := []*Product{}
+	for _, p := range productList {
+		if p.DeletedAt == "" {
+			filteredProductList = append(filteredProductList, p)
+		}
+	}
+	return filteredProductList
 }
 
 func GetProductById(p *Product) (*Product, int) {
@@ -47,10 +42,17 @@ func AddProduct(p *Product) {
 	productList = append(productList, p)
 }
 
-func UpdateProduct(p *Product) *Product {
+func UpdateProduct(p *Product) {
 	_, index := GetProductById(p)
+	p.UpdatedAt = time.Now().String()
 	productList[index] = p
-	return p
+}
+
+func DeleteProduct(p *Product) {
+	_, index := GetProductById(p)
+	p.UpdatedAt = time.Now().String()
+	p.DeletedAt = time.Now().String()
+	productList[index] = p
 }
 
 // Mock Database
@@ -66,6 +68,16 @@ var productList = []*Product{
 	},
 	{
 		ID:          2,
+		Name:        "Espresso",
+		Description: "Espresso Coffe",
+		Price:       2,
+		SKU:         "espresso123",
+		CreatedAt:   time.Now().UTC().String(),
+		UpdatedAt:   time.Now().UTC().String(),
+		DeletedAt:   time.Now().UTC().String(),
+	},
+	{
+		ID:          3,
 		Name:        "Cortado",
 		Description: "Double shot espresso with milk foam",
 		Price:       2.5,

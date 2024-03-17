@@ -20,25 +20,31 @@ var GetProductByIdRegex = query_params_utils.RegexpToGetEntityById("product")
 func (p *ProductHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Get One
 	if r.Method == http.MethodGet && GetProductByIdRegex.MatchString(r.URL.Path) {
-		p.getProductByIdHandler(w, r)
+		p.getOneProductHandler(w, r)
 		return
 	}
 
 	// Get List
 	if r.Method == http.MethodGet {
-		p.getProductsHandler(w, r)
+		p.getListProductsHandler(w, r)
 		return
 	}
 
 	// Create One
 	if r.Method == http.MethodPost {
-		p.addProductHandler(w, r)
+		p.createOneProductHandler(w, r)
 		return
 	}
 
 	// Edit One
 	if r.Method == http.MethodPut {
-		p.updateProductHandler(w, r)
+		p.updateOneProductHandler(w, r)
+		return
+	}
+
+	// Edit One
+	if r.Method == http.MethodDelete {
+		p.deleteOneProductHandler(w, r)
 		return
 	}
 
