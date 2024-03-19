@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func ToJson(w http.ResponseWriter, T any) error {
+func ToJson(w io.Writer, T any) error {
 	return json.NewEncoder(w).Encode(T)
 }
 

@@ -21,7 +21,7 @@ func LaunchHttpServer() {
 	productHandler := product_handlers.NewProductHandler(logger)
 
 	// Assign Routes to handlers
-	server.Handle("/product/", productHandler)
+	server.Handle("/product", productHandler)
 
 	// http server configs
 	httpServer := http.Server{

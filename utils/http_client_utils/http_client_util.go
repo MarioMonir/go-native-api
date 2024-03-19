@@ -1,12 +1,13 @@
 package http_client_utils
 
 import (
-	"api/utils/json_utils"
 	"api/utils/load_env_utils"
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"testing"
 )
 
 func init() {
@@ -17,21 +18,56 @@ type HttpClient struct {
 	logger *log.Logger
 }
 
+type HttpClientPayload struct {
+	Endpoint     string
+	Method       string
+	Body         any
+	EntityStruct any
+}
+
+type Post struct {
+	Id     int    `json:"id"`
+	Title  string `json:"title"`
+	Body   string `json:"body"`
+	UserId int    `json:"userId"`
+}
+
 func NewHttpClient(logger *log.Logger) *HttpClient {
 	return &HttpClient{logger}
 }
 
-func (h *HttpClient) Get(t *testing.T, T any, endpoint string) {
+func (h *HttpClient) Query(p *HttpClientPayload) error {
 	apiUrl := os.Getenv("API_URL")
 
-	res, err := http.Get(apiUrl + endpoint)
-	if err != nil {
-		t.Error("error in request the api \n", err)
+	var (
+		res *http.Response
+		err error
+		url = apiUrl + p.Endpoint
+	)
+
+	var jsonData []byte
+
+	if p.Body != nil {
+		jsonData, err = json.Marshal(p.Body)
+		if err != nil {
+			fmt.Println("Error marshalling to JSON:", err)
+		}
 	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewReader(jsonData))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	res, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+
 	defer res.Body.Close()
 
-	err = json_utils.FromJSON(res.Body, T)
-	if err != nil {
-		t.Error("Unable to Jsonify Res Body to the struct \n", err)
-	}
+	return nil
 }
