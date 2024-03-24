@@ -2,97 +2,99 @@ package product_handlers
 
 import (
 	"api/data"
+	"api/utils/http/http_router_utils"
 	"api/utils/json_utils"
 	"net/http"
-	"strconv"
 )
 
-func (p *ProductHandler) getOneProductHandler(w http.ResponseWriter, r *http.Request) {
-	// Parse the query params using Regexp
-	matches := GetProductByIdRegex.FindStringSubmatch(r.URL.Path)
-	if len(matches) != 2 {
-		http.Error(w, "Unable to parse id", http.StatusBadRequest)
-		return
-	}
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-	// Parse the id from the query params that matched
-	id, err := strconv.Atoi(matches[1])
+func (p *ProductHandler) getOneProductHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := http_router_utils.ParseQueryParamId(r.URL.Path)
 	if err != nil {
-		http.Error(w, "Unable to parse id", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// Get Product by id if exist
-	product, _ := data.GetProductById(&data.Product{ID: id})
-	if product == nil {
-		http.Error(w, "Product Not Found!", http.StatusNotFound)
+	product, err := data.GetOneProduct(&data.Product{ID: id})
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 
 	json_utils.SendJsonWithHandleHttpError(w, product)
 }
 
-func (p *ProductHandler) getListProductsHandler(w http.ResponseWriter, _ *http.Request) {
-	productList := data.GetProducts()
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+func (p *ProductHandler) getListProductsHandler(w http.ResponseWriter) {
+	productList := data.GetListProduct()
+
+	w.WriteHeader(http.StatusOK)
+
 	json_utils.SendJsonWithHandleHttpError(w, productList)
 }
 
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
 func (p *ProductHandler) createOneProductHandler(w http.ResponseWriter, r *http.Request) {
 	newProduct := &data.Product{}
+
 	json_utils.ReciveJsonWithHandleHttpError(w, r.Body, newProduct)
 
 	data.AddProduct(newProduct)
+
+	w.WriteHeader(http.StatusCreated)
+
 	json_utils.SendJsonWithHandleHttpError(w, newProduct)
 }
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 func (p *ProductHandler) updateOneProductHandler(w http.ResponseWriter, r *http.Request) {
-	// Parse the query params using Regexp
-	matches := GetProductByIdRegex.FindStringSubmatch(r.URL.Path)
-	if len(matches) != 2 {
-		http.Error(w, "Unable to parse id", http.StatusBadRequest)
-		return
-	}
-
-	// Parse the id from the query params that matched
-	id, err := strconv.Atoi(matches[1])
+	id, err := http_router_utils.ParseQueryParamId(r.URL.Path)
 	if err != nil {
-		http.Error(w, "Unable to parse id", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	newProduct := &data.Product{}
+	updatedProduct := &data.Product{}
 
-	json_utils.ReciveJsonWithHandleHttpError(w, r.Body, newProduct)
+	json_utils.ReciveJsonWithHandleHttpError(w, r.Body, updatedProduct)
 
-	newProduct.ID = id
-	data.UpdateProduct(newProduct)
-	json_utils.SendJsonWithHandleHttpError(w, newProduct)
+	updatedProduct.ID = id
+
+	err = data.UpdateProduct(updatedProduct)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+	json_utils.SendJsonWithHandleHttpError(w, updatedProduct)
 }
 
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
 func (p *ProductHandler) deleteOneProductHandler(w http.ResponseWriter, r *http.Request) {
-	// Parse the query params using Regexp
-	matches := GetProductByIdRegex.FindStringSubmatch(r.URL.Path)
-	if len(matches) != 2 {
-		http.Error(w, "Unable to parse id", http.StatusBadRequest)
-		return
-	}
-
-	// Parse the id from the query params that matched
-	id, err := strconv.Atoi(matches[1])
+	id, err := http_router_utils.ParseQueryParamId(r.URL.Path)
 	if err != nil {
-		http.Error(w, "Unable to parse id", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Get Product by id if exist
-	product, _ := data.GetProductById(&data.Product{ID: id})
-	if product == nil {
-		http.Error(w, "Product Not Found!", http.StatusNotFound)
+	deletedProduct, err := data.DeleteProduct(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	product.ID = id
-	data.DeleteProduct(product)
+	w.WriteHeader(http.StatusOK)
 
-	json_utils.SendJsonWithHandleHttpError(w, product)
+	json_utils.SendJsonWithHandleHttpError(w, deletedProduct)
 }

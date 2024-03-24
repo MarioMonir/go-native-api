@@ -1,7 +1,7 @@
 package product_handlers
 
 import (
-	"api/utils/query_params_utils"
+	"api/utils/http/http_router_utils"
 	"log"
 	"net/http"
 )
@@ -14,36 +14,40 @@ func NewProductHandler(logger *log.Logger) *ProductHandler {
 	return &ProductHandler{logger}
 }
 
-var GetProductByIdRegex = query_params_utils.RegexpToGetEntityById("product")
+var entity = "product"
 
 // ServeHTTP is the main entry point for the handler and satisfies http handler
 func (p *ProductHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	p.logger.Println("Method: ", r.Method, " | ", r.URL.Path)
+
+	router := http_router_utils.NewEntityRouter(r, "product")
+
 	// Get One
-	if r.Method == http.MethodGet && GetProductByIdRegex.MatchString(r.URL.Path) {
+	if router.MatchGetOneRoute() {
 		p.getOneProductHandler(w, r)
 		return
 	}
 
 	// Get List
-	if r.Method == http.MethodGet {
-		p.getListProductsHandler(w, r)
+	if router.MatchGetListRoute() {
+		p.getListProductsHandler(w)
 		return
 	}
 
 	// Create One
-	if r.Method == http.MethodPost {
+	if router.MatchCreateOneRoute() {
 		p.createOneProductHandler(w, r)
 		return
 	}
 
 	// Edit One
-	if r.Method == http.MethodPut {
+	if router.MatchUpdateOneRoute() {
 		p.updateOneProductHandler(w, r)
 		return
 	}
 
-	// Edit One
-	if r.Method == http.MethodDelete {
+	// Delete One
+	if router.MatchDeleteOneRoute() {
 		p.deleteOneProductHandler(w, r)
 		return
 	}

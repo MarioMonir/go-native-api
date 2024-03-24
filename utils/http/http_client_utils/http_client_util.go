@@ -4,7 +4,6 @@ import (
 	"api/utils/load_env_utils"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -25,18 +24,11 @@ type HttpClientPayload struct {
 	EntityStruct any
 }
 
-type Post struct {
-	Id     int    `json:"id"`
-	Title  string `json:"title"`
-	Body   string `json:"body"`
-	UserId int    `json:"userId"`
-}
-
 func NewHttpClient(logger *log.Logger) *HttpClient {
 	return &HttpClient{logger}
 }
 
-func (h *HttpClient) Query(p *HttpClientPayload) error {
+func (h *HttpClient) Query(p *HttpClientPayload) (*http.Response, error) {
 	apiUrl := os.Getenv("API_URL")
 
 	var (
@@ -50,13 +42,13 @@ func (h *HttpClient) Query(p *HttpClientPayload) error {
 	if p.Body != nil {
 		jsonData, err = json.Marshal(p.Body)
 		if err != nil {
-			fmt.Println("Error marshalling to JSON:", err)
+			return nil, err
 		}
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewReader(jsonData))
+	req, err := http.NewRequest(p.Method, url, bytes.NewReader(jsonData))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -64,10 +56,8 @@ func (h *HttpClient) Query(p *HttpClientPayload) error {
 	client := &http.Client{}
 	res, err = client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	defer res.Body.Close()
-
-	return nil
+	return res, nil
 }

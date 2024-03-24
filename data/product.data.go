@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"time"
 )
 
@@ -17,7 +18,7 @@ type Product struct {
 
 type Products []*Product
 
-func GetProducts() Products {
+func GetListProduct() Products {
 	filteredProductList := []*Product{}
 	for _, p := range productList {
 		if p.DeletedAt == "" {
@@ -27,32 +28,53 @@ func GetProducts() Products {
 	return filteredProductList
 }
 
-func GetProductById(p *Product) (*Product, int) {
+func GetProductById(id int) (*Product, int) {
 	for index, product := range productList {
-		if product.ID == p.ID {
-			p = product
-			return p, index
+		if product.ID == id {
+			return product, index
 		}
 	}
 	return nil, -1
 }
 
+func GetOneProduct(p *Product) (*Product, error) {
+	product, _ := GetProductById(p.ID)
+	if product == nil {
+		return nil, errors.New("Product not found")
+	}
+	return product, nil
+}
+
 func AddProduct(p *Product) {
 	p.ID = len(productList) + 1
+	p.CreatedAt = time.Now().UTC().String()
+	p.UpdatedAt = time.Now().UTC().String()
 	productList = append(productList, p)
 }
 
-func UpdateProduct(p *Product) {
-	_, index := GetProductById(p)
+func UpdateProduct(p *Product) error {
+	product, index := GetProductById(p.ID)
+	if product == nil {
+		return errors.New("Product not found")
+	}
+
 	p.UpdatedAt = time.Now().String()
 	productList[index] = p
+
+	return nil
 }
 
-func DeleteProduct(p *Product) {
-	_, index := GetProductById(p)
-	p.UpdatedAt = time.Now().String()
-	p.DeletedAt = time.Now().String()
-	productList[index] = p
+func DeleteProduct(id int) (*Product, error) {
+	product, index := GetProductById(id)
+	if product == nil {
+		return nil, errors.New("Product not found")
+	}
+
+	product.UpdatedAt = time.Now().UTC().String()
+	product.DeletedAt = time.Now().UTC().String()
+	productList[index] = product
+
+	return product, nil
 }
 
 // Mock Database

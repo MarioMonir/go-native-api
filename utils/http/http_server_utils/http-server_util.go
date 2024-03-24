@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+// var routes = []
+
 func LaunchHttpServer() {
 	port := os.Getenv("PORT")
 
@@ -21,11 +23,11 @@ func LaunchHttpServer() {
 	productHandler := product_handlers.NewProductHandler(logger)
 
 	// Assign Routes to handlers
-	server.Handle("/product", productHandler)
+	server.Handle("/product/", productHandler)
 
 	// http server configs
 	httpServer := http.Server{
-		Addr:         port,
+		Addr:         ":" + port,
 		Handler:      server,
 		IdleTimeout:  time.Second,
 		ReadTimeout:  time.Second,
