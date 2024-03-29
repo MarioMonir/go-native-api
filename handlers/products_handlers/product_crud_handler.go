@@ -7,10 +7,10 @@ import (
 	"net/http"
 )
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+// ------------------------------------------------------
 
 func (p *ProductHandler) getOneProductHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := http_router_utils.ParseQueryParamId(r.URL.Path)
+	id, err := http_router_utils.ParsePathValueId(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -29,9 +29,9 @@ func (p *ProductHandler) getOneProductHandler(w http.ResponseWriter, r *http.Req
 	json_utils.SendJsonWithHandleHttpError(w, product)
 }
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+// ------------------------------------------------------
 
-func (p *ProductHandler) getListProductsHandler(w http.ResponseWriter) {
+func (p *ProductHandler) getListProductsHandler(w http.ResponseWriter, r *http.Request) {
 	productList := data.GetListProduct()
 
 	w.WriteHeader(http.StatusOK)
@@ -39,7 +39,7 @@ func (p *ProductHandler) getListProductsHandler(w http.ResponseWriter) {
 	json_utils.SendJsonWithHandleHttpError(w, productList)
 }
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+// ------------------------------------------------------
 
 func (p *ProductHandler) createOneProductHandler(w http.ResponseWriter, r *http.Request) {
 	newProduct := &data.Product{}
@@ -53,10 +53,10 @@ func (p *ProductHandler) createOneProductHandler(w http.ResponseWriter, r *http.
 	json_utils.SendJsonWithHandleHttpError(w, newProduct)
 }
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+// ------------------------------------------------------
 
 func (p *ProductHandler) updateOneProductHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := http_router_utils.ParseQueryParamId(r.URL.Path)
+	id, err := http_router_utils.ParsePathValueId(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -79,10 +79,10 @@ func (p *ProductHandler) updateOneProductHandler(w http.ResponseWriter, r *http.
 	json_utils.SendJsonWithHandleHttpError(w, updatedProduct)
 }
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+// ------------------------------------------------------
 
 func (p *ProductHandler) deleteOneProductHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := http_router_utils.ParseQueryParamId(r.URL.Path)
+	id, err := http_router_utils.ParsePathValueId(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

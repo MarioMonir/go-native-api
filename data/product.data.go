@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// ------------------------------------------------------
+
 type Product struct {
 	ID          int     `json:"id"`
 	Name        string  `json:"name"`
@@ -18,6 +20,8 @@ type Product struct {
 
 type Products []*Product
 
+// ------------------------------------------------------
+
 func GetListProduct() Products {
 	filteredProductList := []*Product{}
 	for _, p := range productList {
@@ -28,6 +32,8 @@ func GetListProduct() Products {
 	return filteredProductList
 }
 
+// ------------------------------------------------------
+
 func GetProductById(id int) (*Product, int) {
 	for index, product := range productList {
 		if product.ID == id {
@@ -37,6 +43,8 @@ func GetProductById(id int) (*Product, int) {
 	return nil, -1
 }
 
+// ------------------------------------------------------
+
 func GetOneProduct(p *Product) (*Product, error) {
 	product, _ := GetProductById(p.ID)
 	if product == nil {
@@ -45,12 +53,16 @@ func GetOneProduct(p *Product) (*Product, error) {
 	return product, nil
 }
 
+// ------------------------------------------------------
+
 func AddProduct(p *Product) {
 	p.ID = len(productList) + 1
 	p.CreatedAt = time.Now().UTC().String()
 	p.UpdatedAt = time.Now().UTC().String()
 	productList = append(productList, p)
 }
+
+// ------------------------------------------------------
 
 func UpdateProduct(p *Product) error {
 	product, index := GetProductById(p.ID)
@@ -64,6 +76,8 @@ func UpdateProduct(p *Product) error {
 	return nil
 }
 
+// ------------------------------------------------------
+
 func DeleteProduct(id int) (*Product, error) {
 	product, index := GetProductById(id)
 	if product == nil {
@@ -76,6 +90,8 @@ func DeleteProduct(id int) (*Product, error) {
 
 	return product, nil
 }
+
+// ------------------------------------------------------
 
 // Mock Database
 var productList = []*Product{

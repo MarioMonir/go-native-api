@@ -9,9 +9,13 @@ import (
 	"os"
 )
 
+// ------------------------------------------------------
+
 func init() {
 	load_env_utils.LoadEnv()
 }
+
+// ------------------------------------------------------
 
 type HttpClient struct {
 	logger *log.Logger
@@ -24,12 +28,18 @@ type HttpClientPayload struct {
 	EntityStruct any
 }
 
+// ------------------------------------------------------
+
 func NewHttpClient(logger *log.Logger) *HttpClient {
 	return &HttpClient{logger}
 }
 
+// ------------------------------------------------------
+
 func (h *HttpClient) Query(p *HttpClientPayload) (*http.Response, error) {
 	apiUrl := os.Getenv("API_URL")
+
+	h.logger.Println(p.Method, p.Endpoint)
 
 	var (
 		res *http.Response

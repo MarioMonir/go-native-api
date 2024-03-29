@@ -6,5 +6,5 @@ import (
 )
 
 func NewLogger() *log.Logger {
-	return log.New(os.Stdout, "[api] ", log.LstdFlags)
+	return log.New(os.Stdout, "~~> [api] ", log.LstdFlags)
 }
